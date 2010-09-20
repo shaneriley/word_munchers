@@ -44,23 +44,99 @@ $(function() {
     height: 50,
     current_sprite: 0,
     sprite_delay: 3,
-    current_dir: "r",
+    facing: "r",
     moving: false,
     dead: false,
-    speed: 5,
+    speed: 10,
+    row: 0,
+    col: 0,
+    move_count: 0,
     draw: function() {
       var p = this;
       if (!p.dead) {
-        /*if (p.moving) {
+        if (p.moving) {
           p.sprite_delay -= (p.sprite_delay) ? 1 : -3;
+          if (p.current_dir === "r") {
+            if (p.move_count > p.speed) {
+              p.x += p.speed;
+              p.move_count -= p.speed;
+            }
+            else {
+              p.x += p.move_count;
+              p.move_count = 0;
+              p.moving = false;
+              p.col = p.next_col;
+            }
+          }
+          else if (p.current_dir === "u") {
+            if (p.move_count > p.speed) {
+              p.y -= p.speed;
+              p.move_count -= p.speed;
+            }
+            else {
+              p.y -= p.move_count;
+              p.move_count = 0;
+              p.moving = false;
+              p.row = p.next_row;
+            }
+          }
+          if (p.current_dir === "l") {
+            if (p.move_count > p.speed) {
+              p.x -= p.speed;
+              p.move_count -= p.speed;
+            }
+            else {
+              p.x -= p.move_count;
+              p.move_count = 0;
+              p.moving = false;
+              p.col = p.next_col;
+            }
+          }
+          else if (p.current_dir === "d") {
+            if (p.move_count > p.speed) {
+              p.y += p.speed;
+              p.move_count -= p.speed;
+            }
+            else {
+              p.y += p.move_count;
+              p.move_count = 0;
+              p.moving = false;
+              p.row = p.next_row;
+            }
+          }
         }
-        p.moving = (key[37] || key[38] || key[39] || key[40] && !p.moving);
+        else {
+          p.moving = (key[37] || key[38] || key[39] || key[40] && !p.moving);
+          if (key[37]) { p.current_dir = "l"; }
+          if (key[38]) { p.current_dir = "u"; }
+          if (key[39]) { p.current_dir = "r"; }
+          if (key[40]) { p.current_dir = "d"; }
+          if (p.moving) {
+            if (p.current_dir === "d") {
+              p.next_row = (p.row > grid.rows - 1) ? 0 : p.row + 1;
+              p.move_count = grid.h + 3;
+            }
+            else if (p.current_dir === "u") {
+              p.next_row = (p.row - 1 < 0) ? grid.rows - 1 : p.row - 1;
+              p.move_count = grid.h + 3;
+            }
+            else if (p.current_dir === "r") {
+              (p.col >= grid.cols - 1) ? p.moving = false : p.next_col = p.col + 1;
+              p.move_count = grid.w + 3;
+            }
+            else {
+              p.next_col = (p.col - 1 < 0) ? grid.cols - 1 : p.col - 1;
+              p.move_count = grid.w + 3;
+            }
+          }
+        }
         // if moving and !sprite delay, alternate sprite map position
         // if not moving, draw sprite position 0
         if (p.moving && !p.sprite_delay) {
           
-        }*/
+        }
         ctx.drawImage(p.sprite, 0, 0, p.width, p.height, p.x, p.y, p.width, p.height);
+        /*ctx.drawImage(p.sprite, 0, 0, p.width, p.height, p.x, p.y, p.width, p.height);
         if (key[37]) {
           (p.x >= p.speed) ? p.x -= p.speed : p.x = 0;
         }
@@ -72,7 +148,7 @@ $(function() {
         }
         if (key[40]) {
           (p.y + p.height <= ctx.canvas.height - p.speed) ? p.y += p.speed : p.y = ctx.canvas.height - p.height;
-        }
+        }*/
       }
     }
   };
@@ -124,4 +200,4 @@ $(function() {
     img.src = game.image_path + src;
     return img;
   }
-});;
+});
