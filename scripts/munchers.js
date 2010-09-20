@@ -1,7 +1,11 @@
 $(function() {
   var ctx = $("canvas")[0].getContext("2d");
   var game = {
-    paused: false
+    paused: false,
+    image_path: "images/"
+  };
+  var player = {
+    lives: 3
   };
   var key = [];
   main();
@@ -25,7 +29,6 @@ $(function() {
   }
 
   function pause() {
-    console.log("!");
     game.paused = true;
     clearInterval(game.running);
     ctx.save();
@@ -38,5 +41,11 @@ $(function() {
     ctx.fillStyle = "white";
     ctx.fillText("PAUSED", ctx.canvas.width / 2, ctx.canvas.height / 2);
     ctx.restore();
+  }
+
+  function newImage(src) {
+    var img = new Image();
+    img.src = game.image_path + src;
+    return img;
   }
 });;
