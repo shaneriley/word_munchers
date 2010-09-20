@@ -2,13 +2,84 @@ $(function() {
   var ctx = $("canvas")[0].getContext("2d");
   var game = {
     paused: false,
-    image_path: "images/"
+    image_path: "images/",
+    width: ctx.canvas.width,
+    height: ctx.canvas.height,
+    bg: "#000079"
+  };
+  var grid = {
+    w: 117,
+    h: 72,
+    cols: 6,
+    rows: 5,
+    x_offset: 51,
+    y_offset: 66,
+    fillStyle: "#fb68fd",
+    draw: function() {
+      var g = this,
+          x_offset = 45,
+          y_offset = 60;
+      ctx.save();
+      ctx.strokeStyle = g.fillStyle;
+      ctx.lineWidth = 3;
+      ctx.strokeRect(g.x_offset - 6 - .5, g.y_offset - 6 - .5, game.width - g.x_offset - 20, game.height - g.y_offset - 50);
+      ctx.strokeRect(g.x_offset - 1.5, g.y_offset - 1.5, game.width - g.x_offset - 30, game.height - g.y_offset - 60);
+      ctx.fillStyle = g.fillStyle;
+      for (var x = 1; x < g.cols; x++) {
+        ctx.fillRect(x * (g.w + 3) + g.x_offset, g.y_offset, 3, game.height - g.y_offset - 60);
+      }
+      for (var y = 1; y < g.rows; y++) {
+        ctx.fillRect(g.x_offset, y * (g.h + 3) + g.y_offset, game.width - g.x_offset - 30, 3);
+      }
+      ctx.strokeStyle = game.bg;
+      ctx.lineWidth = 2;
+      ctx.strokeRect(g.x_offset - 4, g.y_offset - 4, game.width - g.x_offset - 25, game.height - g.y_offset - 55);
+      ctx.restore();
+    }
   };
   var player = {
-    lives: 3
+    lives: 3,
+    sprite: newImage("player.png"),
+    width: 60,
+    height: 50,
+    current_sprite: 0,
+    sprite_delay: 3,
+    current_dir: "r",
+    moving: false,
+    dead: false,
+    speed: 5,
+    draw: function() {
+      var p = this;
+      if (!p.dead) {
+        /*if (p.moving) {
+          p.sprite_delay -= (p.sprite_delay) ? 1 : -3;
+        }
+        p.moving = (key[37] || key[38] || key[39] || key[40] && !p.moving);
+        // if moving and !sprite delay, alternate sprite map position
+        // if not moving, draw sprite position 0
+        if (p.moving && !p.sprite_delay) {
+          
+        }*/
+        ctx.drawImage(p.sprite, 0, 0, p.width, p.height, p.x, p.y, p.width, p.height);
+        if (key[37]) {
+          (p.x >= p.speed) ? p.x -= p.speed : p.x = 0;
+        }
+        if (key[38]) {
+          (p.y >= p.speed) ? p.y -= p.speed : p.y = 0;
+        }
+        if (key[39]) {
+          (p.x + p.width <= ctx.canvas.width - p.speed) ? p.x += p.speed : p.x = ctx.canvas.width - p.width;
+        }
+        if (key[40]) {
+          (p.y + p.height <= ctx.canvas.height - p.speed) ? p.y += p.speed : p.y = ctx.canvas.height - p.height;
+        }
+      }
+    }
   };
+  player.x = Math.floor(grid.x_offset + (grid.w - player.width) / 2);
+  player.y = Math.floor(grid.y_offset + (grid.h - player.height) / 2);
   var key = [];
-  main();
+  game.running = setInterval(function() { main(); }, 34);
   $(document).bind("keydown keyup", function(e) {
     var cancel_default = (e.keyCode === 32 || (e.keyCode > 36 && e.keyCode < 41));
     key[e.which] = e.type === "keydown";
@@ -26,9 +97,11 @@ $(function() {
 
   function main() {
     ctx.save();
-    ctx.fillStyle = "#000079";
-    ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.fillStyle = game.bg;
+    ctx.fillRect(0, 0, game.width, game.height);
     ctx.restore();
+    player.draw();
+    grid.draw();
   }
 
   function pause() {
