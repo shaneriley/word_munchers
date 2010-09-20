@@ -78,6 +78,7 @@ $(function() {
               p.move_count = 0;
               p.moving = false;
               p.row = p.next_row;
+              p.sprite_delay = 3;
             }
           }
           if (p.current_dir === "l") {
@@ -90,6 +91,7 @@ $(function() {
               p.move_count = 0;
               p.moving = false;
               p.col = p.next_col;
+              p.sprite_delay = 3;
             }
           }
           else if (p.current_dir === "d") {
@@ -102,6 +104,7 @@ $(function() {
               p.move_count = 0;
               p.moving = false;
               p.row = p.next_row;
+              p.sprite_delay = 3;
             }
           }
         }
@@ -113,11 +116,11 @@ $(function() {
           if (key[40]) { p.current_dir = "d"; }
           if (p.moving) {
             if (p.current_dir === "d") {
-              p.next_row = (p.row > grid.rows - 1) ? 0 : p.row + 1;
+              (p.row >= grid.rows - 1) ? p.moving = false : p.next_row = p.row + 1;
               p.move_count = grid.h + 3;
             }
             else if (p.current_dir === "u") {
-              p.next_row = (p.row - 1 < 0) ? grid.rows - 1 : p.row - 1;
+              (p.row === 0) ? p.moving = false : p.next_row = p.row - 1;
               p.move_count = grid.h + 3;
             }
             else if (p.current_dir === "r") {
@@ -125,7 +128,7 @@ $(function() {
               p.move_count = grid.w + 3;
             }
             else {
-              p.next_col = (p.col - 1 < 0) ? grid.cols - 1 : p.col - 1;
+              (p.col === 0) ? p.moving = false : p.next_col = p.col - 1;
               p.move_count = grid.w + 3;
             }
           }
