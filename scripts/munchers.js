@@ -147,7 +147,12 @@ $(function() {
   player.x = Math.floor(grid.x_offset + (grid.w - player.width) / 2);
   player.y = Math.floor(grid.y_offset + (grid.h - player.height) / 2);
   var key = [];
-  game.running = setInterval(function() { main(); }, 34);
+  var $word_data;
+  $.get("data.xml", function(r) {
+    $word_data = $(r);
+    writeWords();
+    game.running = setInterval(function() { main(); }, 34);
+  });
   $(document).bind("keydown keyup", function(e) {
     var cancel_default = (e.keyCode === 32 || (e.keyCode > 36 && e.keyCode < 41));
     key[e.which] = e.type === "keydown";
@@ -191,5 +196,15 @@ $(function() {
     var img = new Image();
     img.src = game.image_path + src;
     return img;
+  }
+
+  function writeWords() {
+    var text, type;
+    for (var x = 0; x < grid.cols; x++) {
+      for (var y = 0; y < grid.rows; y++) {
+        type = (Math.floor(Math.random() * 3)) ? "correct" : "incorrect";
+        var text = $word_data.find(type + " a").eq(Math.floor(Math.random() * $word_data.find(type + " a").length)).text();
+      }
+    }
   }
 });
