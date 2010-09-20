@@ -25,14 +25,17 @@ $(function() {
   });
 
   function main() {
+    ctx.save();
+    ctx.fillStyle = "#000079";
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    ctx.restore();
   }
 
   function pause() {
     game.paused = true;
     clearInterval(game.running);
     ctx.save();
-    ctx.fillStyle = "#0066cc";
+    ctx.fillStyle = "#ff55ff";
     ctx.globalAlpha = .7;
     ctx.fillRect(ctx.canvas.width / 2 - 80, ctx.canvas.height / 2 - 27, 160, 40);
     ctx.globalAlpha = 1;
