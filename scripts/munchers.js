@@ -53,6 +53,12 @@ $(function() {
     move_count: 0,
     draw: function() {
       var p = this;
+      var reset = function() {
+        p.move_count = 0;
+        p.moving = false;
+        p.sprite_delay = 3;
+        p.current_sprite = 0;
+      };
       if (!p.dead) {
         if (p.moving) {
           p.sprite_delay -= (p.sprite_delay) ? 1 : -3;
@@ -66,11 +72,8 @@ $(function() {
             }
             else {
               p.x += p.move_count;
-              p.move_count = 0;
-              p.moving = false;
               p.col = p.next_col;
-              p.sprite_delay = 3;
-              p.current_sprite = 0;
+              reset();
             }
           }
           else if (p.current_dir === "u") {
@@ -80,11 +83,8 @@ $(function() {
             }
             else {
               p.y -= p.move_count;
-              p.move_count = 0;
-              p.moving = false;
               p.row = p.next_row;
-              p.sprite_delay = 3;
-              p.current_sprite = 0;
+              reset();
             }
           }
           if (p.current_dir === "l") {
@@ -94,11 +94,8 @@ $(function() {
             }
             else {
               p.x -= p.move_count;
-              p.move_count = 0;
-              p.moving = false;
               p.col = p.next_col;
-              p.sprite_delay = 3;
-              p.current_sprite = 0;
+              reset();
             }
           }
           else if (p.current_dir === "d") {
@@ -108,11 +105,8 @@ $(function() {
             }
             else {
               p.y += p.move_count;
-              p.move_count = 0;
-              p.moving = false;
               p.row = p.next_row;
-              p.sprite_delay = 3;
-              p.current_sprite = 0;
+              reset();
             }
           }
         }
@@ -142,6 +136,7 @@ $(function() {
               p.move_count = grid.w + 3;
               p.facing = "l";
             }
+            if (!p.moving) { p.current_sprite = 0; }
           }
         }
         var y = (p.facing === "r") ? 0 : p.height;
