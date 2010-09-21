@@ -146,11 +146,14 @@ $(function() {
   };
   player.x = Math.floor(grid.x_offset + (grid.w - player.width) / 2);
   player.y = Math.floor(grid.y_offset + (grid.h - player.height) / 2);
-  var key = [];
-  var $word_data;
+  var key = [],
+      $word_data,
+      answers = [],
+      words = [];
+  for (var i = 0; i < grid.cols; i++) { answers[i] = []; words[i] = []; }
   $.get("data.xml", function(r) {
     $word_data = $(r);
-    writeWords();
+    createWordMatrix();
     game.running = setInterval(function() { main(); }, 34);
   });
   $(document).bind("keydown keyup", function(e) {
@@ -175,6 +178,7 @@ $(function() {
     ctx.restore();
     player.draw();
     grid.draw();
+    writeWords();
   }
 
   function pause() {
@@ -198,13 +202,29 @@ $(function() {
     return img;
   }
 
-  function writeWords() {
-    var text, type;
+  function createWordMatrix() {
+    var type;
     for (var x = 0; x < grid.cols; x++) {
       for (var y = 0; y < grid.rows; y++) {
         type = (Math.floor(Math.random() * 3)) ? "correct" : "incorrect";
-        var text = $word_data.find(type + " a").eq(Math.floor(Math.random() * $word_data.find(type + " a").length)).text();
+        words[x][y] = $word_data.find(type + " a").eq(Math.floor(Math.random() * $word_data.find(type + " a").length)).text();
+        answers[x][y] = (type === "correct") ? 1 : 0;
       }
     }
+  }
+
+  function writeWords() {
+    ctx.save();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 16px 'American Typewriter'";
+    ctx.textAlign = "center";
+    for (var x = 0; x < grid.cols; x++) {
+      for (var y = 0; y < grid.rows; y++) {
+        if (words[x][y]) {
+          ctx.fillText(words[x][y], grid.x_offset + x * (grid.w + 3) + grid.w / 2, grid.y_offset + y * (grid.h + 3) + grid.h / 2 + 8);
+        }
+      }
+    }
+    ctx.restore();
   }
 });
