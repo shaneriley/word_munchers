@@ -160,6 +160,9 @@ $(function() {
         words[p.col][p.row] = "";
         game.correct--;
       }
+      else if (!answers[p.col][p.row] && p.sprite_delay === 7) {
+        player.lives--;
+      }
     }
   };
   player.x = Math.floor(grid.x_offset + (grid.w - player.width) / 2);
@@ -195,6 +198,7 @@ $(function() {
   });
 
   function main() {
+    if (!player.lives) { gameOver(); }
     if (!game.correct) {
       clearInterval(game.running);
       setTimeout(function() {
@@ -266,7 +270,9 @@ $(function() {
   }
 
   function hud() {
-    var topic_width = ctx.measureText($word_data.find("topic").text()).width;
+    var topic_width = ctx.measureText($word_data.find("topic").text()).width,
+        start_x = 372,
+        p = player;
     ctx.save();
     ctx.fillStyle = "#ffffff";
     ctx.font = "bold 16px 'American Typewriter'";
@@ -277,6 +283,9 @@ $(function() {
     ctx.fillText($word_data.find("topic").text(), game.width / 2, 26);
     ctx.fillRect(game.width / 2 - topic_width, 5, topic_width * 2, 2);
     ctx.fillRect(game.width / 2 - topic_width, 36, topic_width * 2, 2);
+    for (var i = 0; i < p.lives; i++) {
+      ctx.drawImage(p.sprite, 0, 0, p.width, p.height, i * (player.width + 15) + start_x, game.height - p.height, p.width, p.height);
+    }
     ctx.restore();
   }
 
@@ -291,5 +300,21 @@ $(function() {
     ctx.textAlign = "center";
     ctx.fillText("Complete!", game.width / 2, game.height / 2 - 14);
     ctx.restore();
+  }
+
+  function gameOver() {
+    clearInterval(game.running);
+    setTimeout(function() {
+      ctx.save();
+      ctx.globalAlpha = .7;
+      ctx.fillStyle = game.bg;
+      ctx.fillRect(0, 0, game.width, game.height);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "white";
+      ctx.font = "bold 28px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText("GAME OVER", game.width / 2, game.height / 2 - 14);
+      ctx.restore();
+    }, 40);
   }
 });
