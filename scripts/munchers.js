@@ -55,8 +55,8 @@ $(function() {
     munching: false,
     dead: false,
     speed: 15,
-    row: 0,
-    col: 0,
+    row: 3,
+    col: 1,
     move_count: 0,
     draw: function() {
       var p = this;
@@ -168,36 +168,13 @@ $(function() {
         p.lives_sprite = 3;
         p.munching = false;
         if (p.lives) {
-          clearInterval(game.running);
-          setTimeout(function() {
-            var y = (grid.h + 3) * 2 + grid.y_offset,
-                width = (grid.w + 3) * grid.cols;
-            ctx.save();
-            ctx.fillStyle = grid.fillStyle;
-            ctx.fillRect(grid.x_offset, y, width - 6, grid.h + 6);
-            ctx.fillStyle = game.bg;
-            ctx.fillRect(grid.x_offset, y + 3, width - 6, grid.h);
-            ctx.fillStyle = "white";
-            ctx.font = game.font;
-            ctx.textAlign = "center";
-            ctx.fillText("Oops! That's not a correct answer!", width / 2 + grid.x_offset, y + 32);
-            ctx.fillText("Press Space Bar to continue.", width / 2 + grid.x_offset, y + 55);
-            ctx.restore();
-            $(document).unbind("keydown.normal keyup.normal").bind("keydown.continue", function(e) {
-              if (e.keyCode === 32) {
-                e.preventDefault();
-                game.running = run();
-                $(this).unbind(e);
-                keyBindings();
-              }
-            });
-          }, 40);
+          dialog("Oops! That's not a correct answer!");
         }
       }
     }
   };
-  player.x = Math.floor(grid.x_offset + (grid.w - player.width) / 2);
-  player.y = Math.floor(grid.y_offset + (grid.h - player.height) / 2);
+  player.x = Math.floor(grid.x_offset + (grid.w + 3) * player.col + (grid.w - player.width) / 2);
+  player.y = Math.floor(grid.y_offset + (grid.h + 3) * player.row + (grid.h - player.height) / 2);
   var key = [],
       $word_data,
       answers = [],
@@ -213,11 +190,16 @@ $(function() {
   function main() {
     if (!player.lives) { gameOver(); }
     if (!game.correct) {
-      clearInterval(game.running);
-      setTimeout(function() {
-        levelComplete();
-      }, 40);
-      setTimeout(function() { var q = 0; }, 1000);
+      dialog("Level complete!", function() {
+        game.level++;
+        player.munching = false;
+        player.current_sprite = 0;
+        player.row = 3;
+        player.col = 1;
+        player.x = Math.floor(grid.x_offset + (grid.w + 3) * player.col + (grid.w - player.width) / 2);
+        player.y = Math.floor(grid.y_offset + (grid.h + 3) * player.row + (grid.h - player.height) / 2);
+        createWordMatrix();
+      });
     }
     ctx.save();
     ctx.fillStyle = game.bg;
@@ -304,6 +286,36 @@ $(function() {
       }
       if (cancel_default) { e.preventDefault(); }
     });
+  }
+
+  function dialog(str) {
+    if (arguments[1] && typeof arguments[1] === "function") { var callback = arguments[1]; }
+    clearInterval(game.running);
+    setTimeout(function() {
+      var y = (grid.h + 3) * 2 + grid.y_offset,
+          width = (grid.w + 3) * grid.cols;
+      str = str || "Please pass me at least one string to output.";
+      ctx.save();
+      ctx.fillStyle = grid.fillStyle;
+      ctx.fillRect(grid.x_offset, y, width - 6, grid.h + 6);
+      ctx.fillStyle = game.bg;
+      ctx.fillRect(grid.x_offset, y + 3, width - 6, grid.h);
+      ctx.fillStyle = "white";
+      ctx.font = game.font;
+      ctx.textAlign = "center";
+      ctx.fillText(str, width / 2 + grid.x_offset, y + 32);
+      ctx.fillText("Press Space Bar to continue.", width / 2 + grid.x_offset, y + 55);
+      ctx.restore();
+      $(document).unbind("keydown.normal keyup.normal").bind("keydown.continue", function(e) {
+        if (e.keyCode === 32) {
+          e.preventDefault();
+          game.running = run();
+          $(this).unbind(e);
+          keyBindings();
+          callback();
+        }
+      });
+    }, 40);
   }
 
   function hud() {
