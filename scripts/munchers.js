@@ -9,7 +9,8 @@ $(function() {
     level: 1,
     score: 0,
     points: 5,
-    correct: 0
+    correct: 0,
+    font: "bold 16px 'American Typewriter'"
   };
   var grid = {
     w: 117,
@@ -165,6 +166,33 @@ $(function() {
       else if (!answers[p.col][p.row] && p.sprite_delay === 7) {
         p.lives--;
         p.lives_sprite = 3;
+        p.munching = false;
+        if (p.lives) {
+          clearInterval(game.running);
+          setTimeout(function() {
+            var y = (grid.h + 3) * 2 + grid.y_offset,
+                width = (grid.w + 3) * grid.cols;
+            ctx.save();
+            ctx.fillStyle = grid.fillStyle;
+            ctx.fillRect(grid.x_offset, y, width - 6, grid.h + 6);
+            ctx.fillStyle = game.bg;
+            ctx.fillRect(grid.x_offset, y + 3, width - 6, grid.h);
+            ctx.fillStyle = "white";
+            ctx.font = game.font;
+            ctx.textAlign = "center";
+            ctx.fillText("Oops! That's not a correct answer!", width / 2 + grid.x_offset, y + 32);
+            ctx.fillText("Press Space Bar to continue.", width / 2 + grid.x_offset, y + 55);
+            ctx.restore();
+            $(document).unbind("keydown.normal keyup.normal").bind("keydown.continue", function(e) {
+              if (e.keyCode === 32) {
+                e.preventDefault();
+                game.running = run();
+                $(this).unbind(e);
+                keyBindings();
+              }
+            });
+          }, 40);
+        }
       }
     }
   };
@@ -178,26 +206,8 @@ $(function() {
   $.get("data.xml", function(r) {
     $word_data = $(r);
     createWordMatrix();
-    game.running = setInterval(function() { main(); }, 34);
-  });
-  $(document).bind("keydown keyup", function(e) {
-    var cancel_default = (e.keyCode === 32 || (e.keyCode > 36 && e.keyCode < 41));
-    key[e.which] = e.type === "keydown";
-    if (key[e.which] && e.keyCode === 32) {
-      player.munching = true;
-      player.sprite_delay = 8;
-      player.current_sprite = 3;
-    }
-    if (key[e.which] && e.keyCode === 80) {
-      if (!game.paused) {
-        pause();
-      }
-      else {
-        game.paused = false;
-        game.running = setInterval(function() { main(); }, 34);
-      }
-    }
-    if (cancel_default) { e.preventDefault(); }
+    keyBindings();
+    game.running = run();
   });
 
   function main() {
@@ -260,7 +270,7 @@ $(function() {
   function writeWords() {
     ctx.save();
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 16px 'American Typewriter'";
+    ctx.font = game.font;
     ctx.textAlign = "center";
     for (var x = 0; x < grid.cols; x++) {
       for (var y = 0; y < grid.rows; y++) {
@@ -272,13 +282,37 @@ $(function() {
     ctx.restore();
   }
 
+  function run() { return setInterval(function() { main(); }, 34); }
+
+  function keyBindings() {
+    $(document).bind("keydown.normal keyup.normal", function(e) {
+      var cancel_default = (e.keyCode === 32 || (e.keyCode > 36 && e.keyCode < 41));
+      key[e.which] = e.type === "keydown";
+      if (key[e.which] && e.keyCode === 32) {
+        player.munching = true;
+        player.sprite_delay = 8;
+        player.current_sprite = 3;
+      }
+      if (key[e.which] && e.keyCode === 80) {
+        if (!game.paused) {
+          pause();
+        }
+        else {
+          game.paused = false;
+          game.running = run();
+        }
+      }
+      if (cancel_default) { e.preventDefault(); }
+    });
+  }
+
   function hud() {
     var topic_width = ctx.measureText($word_data.find("topic").text()).width,
         start_x = 372,
         p = player;
     ctx.save();
     ctx.fillStyle = "#ffffff";
-    ctx.font = "bold 16px 'American Typewriter'";
+    ctx.font = game.font;
     ctx.textAlign = "left";
     ctx.fillText("Score:  " + game.score, 5, game.height - 22);
     ctx.fillText("Level: " + game.level, 5, 21);
