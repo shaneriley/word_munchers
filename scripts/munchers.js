@@ -8,7 +8,8 @@ $(function() {
     bg: "#000079",
     level: 1,
     score: 0,
-    points: 5
+    points: 5,
+    correct: 0
   };
   var grid = {
     w: 117,
@@ -157,6 +158,7 @@ $(function() {
       if (answers[p.col][p.row] && words[p.col][p.row]) {
         game.score += game.points * game.level;
         words[p.col][p.row] = "";
+        game.correct--;
       }
     }
   };
@@ -193,6 +195,18 @@ $(function() {
   });
 
   function main() {
+    if (!game.correct) {
+      clearInterval(game.running);
+      setTimeout(function() {
+        ctx.save();
+        ctx.fillStyle = "white";
+        ctx.font = "bold 28px monospace";
+        ctx.textAlign = "center";
+        ctx.fillText("Complete!", game.width / 2, game.height / 2 - 14);
+        ctx.restore();
+      }, 40);
+      setTimeout(function() { var q = 0; }, 1000);
+    }
     ctx.save();
     ctx.fillStyle = game.bg;
     ctx.fillRect(0, 0, game.width, game.height);
@@ -200,6 +214,7 @@ $(function() {
     player.draw();
     grid.draw();
     writeWords();
+    hud();
   }
 
   function pause() {
@@ -229,7 +244,13 @@ $(function() {
       for (var y = 0; y < grid.rows; y++) {
         type = (Math.floor(Math.random() * 3)) ? "correct" : "incorrect";
         words[x][y] = $word_data.find(type + " a").eq(Math.floor(Math.random() * $word_data.find(type + " a").length)).text();
-        answers[x][y] = (type === "correct") ? 1 : 0;
+        if (type === "correct") {
+          answers[x][y] = 1;
+          game.correct++;
+        }
+        else {
+          answers[x][y] = 0;
+        }
       }
     }
   }
@@ -246,6 +267,21 @@ $(function() {
         }
       }
     }
+    ctx.restore();
+  }
+
+  function hud() {
+    var topic_width = ctx.measureText($word_data.find("topic").text()).width;
+    ctx.save();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 16px 'American Typewriter'";
+    ctx.textAlign = "left";
+    ctx.fillText("Score:  " + game.score, 5, game.height - 22);
+    ctx.fillText("Level: " + game.level, 5, 21);
+    ctx.textAlign = "center";
+    ctx.fillText($word_data.find("topic").text(), game.width / 2, 26);
+    ctx.fillRect(game.width / 2 - topic_width, 5, topic_width * 2, 2);
+    ctx.fillRect(game.width / 2 - topic_width, 36, topic_width * 2, 2);
     ctx.restore();
   }
 });
