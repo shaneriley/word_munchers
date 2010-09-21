@@ -5,7 +5,10 @@ $(function() {
     image_path: "images/",
     width: ctx.canvas.width,
     height: ctx.canvas.height,
-    bg: "#000079"
+    bg: "#000079",
+    level: 1,
+    score: 0,
+    points: 5
   };
   var grid = {
     w: 117,
@@ -46,6 +49,7 @@ $(function() {
     sprite_delay: 3,
     facing: "r",
     moving: false,
+    munching: false,
     dead: false,
     speed: 10,
     row: 0,
@@ -59,7 +63,8 @@ $(function() {
         p.sprite_delay = 3;
         p.current_sprite = 0;
       };
-      if (!p.dead) {
+      if (p.munching) { p.munch(); }
+      if (!p.dead && !p.munching) {
         if (p.moving) {
           p.sprite_delay -= (p.sprite_delay) ? 1 : -3;
           if (p.sprite_delay === 0) {
@@ -142,6 +147,17 @@ $(function() {
         var y = (p.facing === "r") ? 0 : p.height;
         ctx.drawImage(p.sprite, p.current_sprite * p.width, y, p.width, p.height, p.x, p.y, p.width, p.height);
       }
+    },
+    munch: function() {
+      var p = this,
+          y = (p.facing === "r") ? 0 : p.height;
+      (p.sprite_delay === 0) ? p.munching = false : p.sprite_delay--;
+      p.current_sprite = (p.current_sprite % 2) ? 0 : 3;
+      ctx.drawImage(p.sprite, p.current_sprite * p.width, y, p.width, p.height, p.x, p.y, p.width, p.height);
+      if (answers[p.col][p.row] && words[p.col][p.row]) {
+        game.score += game.points * game.level;
+        words[p.col][p.row] = "";
+      }
     }
   };
   player.x = Math.floor(grid.x_offset + (grid.w - player.width) / 2);
@@ -159,7 +175,12 @@ $(function() {
   $(document).bind("keydown keyup", function(e) {
     var cancel_default = (e.keyCode === 32 || (e.keyCode > 36 && e.keyCode < 41));
     key[e.which] = e.type === "keydown";
-    if (e.type === "keydown" && e.keyCode === 80) {
+    if (key[e.which] && e.keyCode === 32) {
+      player.munching = true;
+      player.sprite_delay = 8;
+      player.current_sprite = 3;
+    }
+    if (key[e.which] && e.keyCode === 80) {
       if (!game.paused) {
         pause();
       }
