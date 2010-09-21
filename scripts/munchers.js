@@ -48,11 +48,12 @@ $(function() {
     height: 50,
     current_sprite: 0,
     sprite_delay: 3,
+    lives_sprite: 0,
     facing: "r",
     moving: false,
     munching: false,
     dead: false,
-    speed: 10,
+    speed: 15,
     row: 0,
     col: 0,
     move_count: 0,
@@ -64,7 +65,7 @@ $(function() {
         p.sprite_delay = 3;
         p.current_sprite = 0;
       };
-      if (p.munching) { p.munch(); }
+      (p.munching) ? p.munch() : p.lives_sprite = 0;
       if (!p.dead && !p.munching) {
         if (p.moving) {
           p.sprite_delay -= (p.sprite_delay) ? 1 : -3;
@@ -153,15 +154,17 @@ $(function() {
       var p = this,
           y = (p.facing === "r") ? 0 : p.height;
       (p.sprite_delay === 0) ? p.munching = false : p.sprite_delay--;
-      p.current_sprite = (p.current_sprite % 2) ? 0 : 3;
+      p.current_sprite = (p.current_sprite % 2) ? 0 : 5;
       ctx.drawImage(p.sprite, p.current_sprite * p.width, y, p.width, p.height, p.x, p.y, p.width, p.height);
       if (answers[p.col][p.row] && words[p.col][p.row]) {
         game.score += game.points * game.level;
         words[p.col][p.row] = "";
         game.correct--;
+        p.lives_sprite = 4;
       }
       else if (!answers[p.col][p.row] && p.sprite_delay === 7) {
-        player.lives--;
+        p.lives--;
+        p.lives_sprite = 3;
       }
     }
   };
@@ -284,7 +287,7 @@ $(function() {
     ctx.fillRect(game.width / 2 - topic_width, 5, topic_width * 2, 2);
     ctx.fillRect(game.width / 2 - topic_width, 36, topic_width * 2, 2);
     for (var i = 0; i < p.lives; i++) {
-      ctx.drawImage(p.sprite, 0, 0, p.width, p.height, i * (player.width + 15) + start_x, game.height - p.height, p.width, p.height);
+      ctx.drawImage(p.sprite, p.lives_sprite * p.width, 0, p.width, p.height, i * (player.width + 15) + start_x, game.height - p.height, p.width, p.height);
     }
     ctx.restore();
   }
