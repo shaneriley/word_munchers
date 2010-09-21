@@ -198,12 +198,7 @@ $(function() {
     if (!game.correct) {
       clearInterval(game.running);
       setTimeout(function() {
-        ctx.save();
-        ctx.fillStyle = "white";
-        ctx.font = "bold 28px monospace";
-        ctx.textAlign = "center";
-        ctx.fillText("Complete!", game.width / 2, game.height / 2 - 14);
-        ctx.restore();
+        levelComplete();
       }, 40);
       setTimeout(function() { var q = 0; }, 1000);
     }
@@ -282,6 +277,19 @@ $(function() {
     ctx.fillText($word_data.find("topic").text(), game.width / 2, 26);
     ctx.fillRect(game.width / 2 - topic_width, 5, topic_width * 2, 2);
     ctx.fillRect(game.width / 2 - topic_width, 36, topic_width * 2, 2);
+    ctx.restore();
+  }
+
+  function levelComplete() {
+    ctx.save();
+    ctx.globalAlpha = .7;
+    ctx.fillStyle = game.bg;
+    ctx.fillRect(0, 0, game.width, game.height);
+    ctx.globalAlpha = 1;
+    ctx.fillStyle = "white";
+    ctx.font = "bold 28px monospace";
+    ctx.textAlign = "center";
+    ctx.fillText("Complete!", game.width / 2, game.height / 2 - 14);
     ctx.restore();
   }
 });
