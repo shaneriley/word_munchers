@@ -241,6 +241,7 @@ $(function() {
     troggles.draw();
     grid.draw();
     writeWords();
+    gutters();
     hud();
   }
 
@@ -459,6 +460,16 @@ $(function() {
         reset();
       }
     }
+  }
+
+  function gutters() {
+    ctx.save();
+    ctx.fillStyle = game.bg;
+    ctx.fillRect(0, 0, 43, game.height);
+    ctx.fillRect(0, 0, game.width, 58);
+    ctx.fillRect(game.width - 25, 0, 25, game.height);
+    ctx.fillRect(0, game.height - 55, game.width, 55);
+    ctx.restore();
   }
 
   function random(max, min) {
