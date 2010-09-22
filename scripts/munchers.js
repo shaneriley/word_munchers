@@ -63,39 +63,46 @@ $(function() {
       for (var i in e.types) {
         var troggle = e.types[i],
             edge = random(3);
-        if (troggle.min_level >= game.level && !troggle.present) {
+        if (troggle.min_level <= game.level && !troggle.present) {
           troggle.present = true;
           troggle.wait_count = e.wait - ((game.level < 15) ? game.level : 15);
           troggle.speed = e.wait - ((game.level < 15) ? game.level : 15);
           if (edge === 0) {
             troggle.row = random(g.rows - 1);
-            troggle.col = 0;
+            troggle.col = -1;
             troggle.current_dir = "r";
           }
           else if (edge === 1) {
-            troggle.row = 0;
+            troggle.row = -1;
             troggle.col = random(g.cols - 1);
             troggle.current_dir = "d";
           }
           else if (edge === 2) {
             troggle.row = random(g.rows - 1);
-            troggle.col = g.cols - 1;
+            troggle.col = g.cols;
             troggle.current_dir = "l";
           }
           else {
-            troggle.row = g.rows - 1;
+            troggle.row = g.rows;
             troggle.col = random(g.cols - 1);
             troggle.current_dir = "u";
           }
-          troggle.x = troggle.col * (g.w + g.gutter) + g.x_offset + ((g.w - troggle.width) / 2);
-          troggle.y = troggle.row * (g.h + g.gutter) + g.y_offset + ((g.h - troggle.height) / 2);
+          troggle.x = Math.floor(troggle.col * (g.w + g.gutter) + g.x_offset + ((g.w - troggle.width) / 2));
+          troggle.y = Math.floor(troggle.row * (g.h + g.gutter) + g.y_offset + ((g.h - troggle.height) / 2));
         }
       }
     },
     draw: function() {
       var t = this,
           g = grid;
-      t.next_enemy ? t.next_enemy-- : t.newEnemy();
+      if (t.next_enemy) { t.next_enemy--; }
+      else {
+        for (var i in t.types) {
+          if (t.types[i].min_level <= game.level && !t.types[i].present) {
+            t.newEnemy();
+          }
+        }
+      }
       for (var i in t.types) {
         var troggle = t.types[i];
         if (troggle.present) {
@@ -121,7 +128,14 @@ $(function() {
             }
             else { moveSprite(troggle); }
           }
-          ctx.drawImage(troggle.sprite, troggle.current_sprite * troggle.width, 0, troggle.width, troggle.height, troggle.x, troggle.y, troggle.width, troggle.height);
+          if (troggle.present) {
+            ctx.drawImage(troggle.sprite, troggle.current_sprite * troggle.width, 0, troggle.width, troggle.height, troggle.x, troggle.y, troggle.width, troggle.height);
+          }
+          else {
+            troggle.moving = troggle.present = false;
+            troggle.move_count = 0;
+            t.next_enemy = random(150, 50);
+          }
         }
       }
     }
@@ -231,6 +245,10 @@ $(function() {
         player.current_sprite = 0;
         player.row = 3;
         player.col = 1;
+        for (var i in troggles.types) {
+          troggles.types[i].present = troggles.types[i].moving = false;
+        }
+        troggles.next_enemy = random(300, 100);
         player.x = Math.floor(grid.x_offset + (grid.w + 3) * player.col + (grid.w - player.width) / 2);
         player.y = Math.floor(grid.y_offset + (grid.h + 3) * player.row + (grid.h - player.height) / 2);
         createWordMatrix();
@@ -353,7 +371,7 @@ $(function() {
           game.running = run();
           $(this).unbind(e);
           keyBindings();
-          callback();
+          if (callback) { callback(); }
         }
       });
     }, 40);
@@ -414,6 +432,8 @@ $(function() {
       p.moving = false;
       p.sprite_delay = 3;
       p.current_sprite = 0;
+      delete p.next_row;
+      delete p.next_col;
       if (p.hasOwnProperty("min_level")) { p.wait_count = troggles.wait - ((game.level < 15) ? game.level : 15); }
     };
     if (p.current_dir === "r") {
