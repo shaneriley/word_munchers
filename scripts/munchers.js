@@ -236,12 +236,7 @@ $(function() {
         p.lives_sprite = 4;
       }
       else if (!answers[p.col][p.row] && p.sprite_delay === 7) {
-        p.lives--;
-        p.lives_sprite = 3;
-        p.munching = false;
-        if (p.lives) {
-          dialog("Oops! That's not a correct answer!");
-        }
+        p.kill("Oops! That's not a correct answer!");
       }
     },
     kill: function(str) {
@@ -257,14 +252,13 @@ $(function() {
       var p = this;
       p.munching = false;
       p.current_sprite = 0;
-      p.row = 3;
-      p.col = 1;
+      p.row = random(grid.rows - 2, 1);
+      p.col = random(grid.cols - 2, 1);
       p.x = Math.floor(grid.x_offset + (grid.w + 3) * p.col + (grid.w - p.width) / 2);
       p.y = Math.floor(grid.y_offset + (grid.h + 3) * p.row + (grid.h - p.height) / 2);
     }
   };
-  player.x = Math.floor(grid.x_offset + (grid.w + 3) * player.col + (grid.w - player.width) / 2);
-  player.y = Math.floor(grid.y_offset + (grid.h + 3) * player.row + (grid.h - player.height) / 2);
+  player.reset();
   var key = [],
       $word_data,
       answers = [],
@@ -281,17 +275,12 @@ $(function() {
     if (!player.lives) { gameOver(); }
     if (!game.correct) {
       dialog("Level complete!", function() {
+        player.reset();
         game.level++;
-        player.munching = false;
-        player.current_sprite = 0;
-        player.row = 3;
-        player.col = 1;
         for (var i in troggles.types) {
           troggles.types[i].present = troggles.types[i].moving = false;
         }
         troggles.next_enemy = random(300, 100);
-        player.x = Math.floor(grid.x_offset + (grid.w + 3) * player.col + (grid.w - player.width) / 2);
-        player.y = Math.floor(grid.y_offset + (grid.h + 3) * player.row + (grid.h - player.height) / 2);
         createWordMatrix();
       });
     }
