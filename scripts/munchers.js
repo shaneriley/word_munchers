@@ -51,11 +51,13 @@ $(function() {
         height: 50,
         min_level: 1,
         current_sprite: 0,
+        sprite_delay: 3,
+        speed: 10,
         present: false
       }
     },
     enemies: [],
-    wait: 30,
+    wait: 50,
     next_enemy: random(300, 100),
     newEnemy: function() {
       var e = this,
@@ -66,7 +68,6 @@ $(function() {
         if (troggle.min_level <= game.level && !troggle.present) {
           troggle.present = true;
           troggle.wait_count = e.wait - ((game.level < 15) ? game.level : 15);
-          troggle.speed = e.wait - ((game.level < 15) ? game.level : 15);
           if (edge === 0) {
             troggle.row = random(g.rows - 1);
             troggle.col = -1;
@@ -108,6 +109,10 @@ $(function() {
         if (troggle.present) {
           (!troggle.wait_count && !troggle.moving) ? troggle.moving = true : troggle.wait_count--;
           if (troggle.moving) {
+            troggle.sprite_delay -= (troggle.sprite_delay) ? 1 : -3;
+            if (troggle.sprite_delay === 0) {
+              troggle.current_sprite = (troggle.current_sprite % 2) ? 2 : 1;
+            }
             if (!troggle.move_count) {
               if (troggle.current_dir === "l") {
                 (troggle.col === -1) ? troggle.present = false : troggle.next_col = troggle.col - 1;
@@ -329,7 +334,7 @@ $(function() {
     $(document).bind("keydown.normal keyup.normal", function(e) {
       var cancel_default = (e.keyCode === 32 || (e.keyCode > 36 && e.keyCode < 41));
       key[e.which] = e.type === "keydown";
-      if (key[e.which] && e.keyCode === 32) {
+      if (key[e.which] && e.keyCode === 32 && !player.moving) {
         player.munching = true;
         player.sprite_delay = 8;
         player.current_sprite = 3;
