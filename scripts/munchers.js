@@ -53,7 +53,8 @@ $(function() {
         current_sprite: 0,
         sprite_delay: 3,
         speed: 10,
-        present: false
+        present: false,
+        latin_name: "Trogglus normalus"
       }
     },
     enemies: [],
@@ -132,7 +133,12 @@ $(function() {
                 troggle.move_count = g.h + g.gutter;
               }
             }
-            else { moveSprite(troggle); }
+            else {
+              moveSprite(troggle);
+              if (troggle.move_count <= 10) {
+                t.checkCollision(i);
+              }
+            }
           }
           if (troggle.present) {
             ctx.drawImage(troggle.sprite, troggle.current_sprite * troggle.width, troggle.height * dir[troggle.current_dir], troggle.width, troggle.height, troggle.x, troggle.y, troggle.width, troggle.height);
@@ -143,6 +149,17 @@ $(function() {
             t.next_enemy = random(150, 50);
           }
         }
+      }
+    },
+    checkCollision: function(name) {
+      var p = player,
+          e = this.types[name];
+          collided = false;
+      if (e.current_dir === "l" || e.current_dir === "r") { collided = (e.next_col === p.col && e.row === p.row); }
+      else if (e.current_dir === "u" || e.current_dir === "d") { collided = (e.next_row === p.row && e.col === p.col); }
+      if (collided) {
+        p.kill("Aargh! You were eaten by a " + e.latin_name + ".");
+        p.reset();
       }
     }
   };
@@ -226,6 +243,24 @@ $(function() {
           dialog("Oops! That's not a correct answer!");
         }
       }
+    },
+    kill: function(str) {
+      var p = this;
+      p.lives--;
+      p.lives_sprite = 3;
+      p.munching = false;
+      if (p.lives) {
+        dialog(str);
+      }
+    },
+    reset: function() {
+      var p = this;
+      p.munching = false;
+      p.current_sprite = 0;
+      p.row = 3;
+      p.col = 1;
+      p.x = Math.floor(grid.x_offset + (grid.w + 3) * p.col + (grid.w - p.width) / 2);
+      p.y = Math.floor(grid.y_offset + (grid.h + 3) * p.row + (grid.h - p.height) / 2);
     }
   };
   player.x = Math.floor(grid.x_offset + (grid.w + 3) * player.col + (grid.w - player.width) / 2);
