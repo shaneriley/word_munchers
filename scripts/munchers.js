@@ -108,6 +108,10 @@ $(function() {
       for (var i in t.types) {
         var troggle = t.types[i],
             dir = { l: 0, r: 1, u: 2, d: 3 };
+        t.entering = ((troggle.current_dir === "l" && troggle.col >= grid.cols) ||
+                     (troggle.current_dir === "u" && troggle.row >= grid.rows) ||
+                     (troggle.current_dir === "r" && troggle.col < 0) ||
+                     (troggle.current_dir === "d" && troggle.row < 0));
         if (troggle.present) {
           (!troggle.wait_count && !troggle.moving) ? troggle.moving = true : troggle.wait_count--;
           if (troggle.moving) {
@@ -161,6 +165,22 @@ $(function() {
         p.kill("Aargh! You were eaten by a " + e.latin_name + ".");
         p.reset();
       }
+    },
+    warning: function() {
+      var s = "Troggle!", y = 184;
+      s = s.split("");
+      ctx.save();
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "white";
+      ctx.fillStyle = "white";
+      ctx.font = game.font;
+      ctx.textAlign = "center";
+      ctx.strokeRect(5, 155, 32, 188);
+      for (var i in s) {
+        ctx.fillText(s[i], 21, y);
+        y += 20;
+      }
+      ctx.restore();
     }
   };
   var player = {
@@ -425,6 +445,7 @@ $(function() {
       ctx.drawImage(p.sprite, p.lives_sprite * p.width, 0, p.width, p.height, i * (player.width + 15) + start_x, game.height - p.height, p.width, p.height);
     }
     ctx.restore();
+    if (troggles.entering) { troggles.warning(); }
   }
 
   function levelComplete() {
