@@ -105,7 +105,8 @@ $(function() {
         }
       }
       for (var i in t.types) {
-        var troggle = t.types[i];
+        var troggle = t.types[i],
+            dir = { l: 0, r: 1, u: 2, d: 3 };
         if (troggle.present) {
           (!troggle.wait_count && !troggle.moving) ? troggle.moving = true : troggle.wait_count--;
           if (troggle.moving) {
@@ -134,7 +135,7 @@ $(function() {
             else { moveSprite(troggle); }
           }
           if (troggle.present) {
-            ctx.drawImage(troggle.sprite, troggle.current_sprite * troggle.width, 0, troggle.width, troggle.height, troggle.x, troggle.y, troggle.width, troggle.height);
+            ctx.drawImage(troggle.sprite, troggle.current_sprite * troggle.width, troggle.height * dir[troggle.current_dir], troggle.width, troggle.height, troggle.x, troggle.y, troggle.width, troggle.height);
           }
           else {
             troggle.moving = troggle.present = false;
