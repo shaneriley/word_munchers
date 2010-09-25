@@ -521,6 +521,19 @@ $(function() {
   function gameOver() {
     clearInterval(game.running);
     setTimeout(function() {
+      var p = player,
+          g = game,
+          t = troggles.types;
+      var troggle_reset = {
+        current_sprite: 0,
+        sprite_delay: 3,
+        speed: 10,
+        present: false,
+        munching: false,
+        moving: false,
+        move_count: 0
+      };
+      $(document).unbind("keyup.normal keydown.normal");
       ctx.save();
       ctx.globalAlpha = .7;
       ctx.fillStyle = game.bg;
@@ -531,6 +544,23 @@ $(function() {
       ctx.textAlign = "center";
       ctx.fillText("GAME OVER", game.width / 2, game.height / 2 - 14);
       ctx.restore();
+      g.level = 1;
+      g.score = 0;
+      g.correct = 0;
+      for (var i in t) {
+        t[i] = $.extend(troggle_reset, t[i]);
+      }
+      p.lives = 3;
+      p.sprite_delay = 3;
+      p.facing = "r";
+      p.moving = false;
+      p.dead = false;
+      p.move_count = 0;
+      p.reset();
+      setTimeout(function() {
+        createWordMatrix();
+        titleScreen();
+      }, 2000);
     }, 40);
   }
 
