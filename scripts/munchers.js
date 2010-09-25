@@ -54,6 +54,7 @@ $(function() {
         sprite_delay: 3,
         speed: 10,
         present: false,
+        munching: false,
         latin_name: "Trogglus normalus"
       }
     },
@@ -145,7 +146,10 @@ $(function() {
             }
           }
           if (troggle.present) {
-            ctx.drawImage(troggle.sprite, troggle.current_sprite * troggle.width, troggle.height * dir[troggle.current_dir], troggle.width, troggle.height, troggle.x, troggle.y, troggle.width, troggle.height);
+            if (troggle.munching) { t.munch(troggle); }
+            else {
+              ctx.drawImage(troggle.sprite, troggle.current_sprite * troggle.width, troggle.height * dir[troggle.current_dir], troggle.width, troggle.height, troggle.x, troggle.y, troggle.width, troggle.height);
+            }
           }
           else {
             troggle.moving = troggle.present = false;
@@ -162,8 +166,8 @@ $(function() {
       if (e.current_dir === "l" || e.current_dir === "r") { collided = (e.next_col === p.col && e.row === p.row); }
       else if (e.current_dir === "u" || e.current_dir === "d") { collided = (e.next_row === p.row && e.col === p.col); }
       if (collided) {
-        p.kill("Aargh! You were eaten by a " + e.latin_name + ".");
-        p.reset();
+        e.munching = true;
+        e.sprite_delay = 3;
       }
     },
     warning: function() {
@@ -181,6 +185,19 @@ $(function() {
         y += 20;
       }
       ctx.restore();
+    },
+    munch: function(t) {
+      $(document).unbind("keydown.normal keyup.normal");
+      (t.sprite_delay === 0) ? t.munching = false : t.sprite_delay--;
+      t.current_sprite = (t.current_sprite % 2) ? 0 : 1;
+      ctx.drawImage(t.sprite, t.current_sprite * t.width, t.height * 4, t.width, t.height, t.x, t.y, t.width, t.height);
+      if (!t.munching) {
+        player.kill("Aargh! You were eaten by a " + t.latin_name + ".");
+        t.sprite_delay = 8;
+        t.munching = false;
+        player.reset();
+        keyBindings();
+      }
     }
   };
   var player = {
@@ -292,8 +309,9 @@ $(function() {
           t = troggles.types;
       for (var i in t) {
         if (p.row === t[i].row && p.col === t[i].col) {
-          p.kill("Aargh! You were eaten by a " + t[i].latin_name + ".");
-          p.reset();
+          t[i].munching = true;
+          t[i].sprite_delay = 8;
+          troggles.munch(t[i]);
         }
       }
     }
