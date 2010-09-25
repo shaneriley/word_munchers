@@ -209,6 +209,7 @@ $(function() {
             p.current_sprite = (p.current_sprite % 2) ? 2 : 1;
           }
           moveSprite(p);
+          if (p.move_count < p.speed) { p.checkCollision(); }
         }
         else {
           p.moving = (key[37] || key[38] || key[39] || key[40] && !p.moving);
@@ -269,13 +270,32 @@ $(function() {
       }
     },
     reset: function() {
-      var p = this;
+      var p = this,
+          t = troggles.types;
       p.munching = false;
       p.current_sprite = 0;
-      p.row = random(grid.rows - 2, 1);
-      p.col = random(grid.cols - 2, 1);
+      var newPosition = function() {
+        p.row = random(grid.rows - 2, 1);
+        p.col = random(grid.cols - 2, 1);
+        for (var i in t) {
+          if (p.row === t[i].row && p.col === t[i].col) {
+            newPosition();
+          }
+        }
+      };
+      newPosition();
       p.x = Math.floor(grid.x_offset + (grid.w + 3) * p.col + (grid.w - p.width) / 2);
       p.y = Math.floor(grid.y_offset + (grid.h + 3) * p.row + (grid.h - p.height) / 2);
+    },
+    checkCollision: function() {
+      var p = player,
+          t = troggles.types;
+      for (var i in t) {
+        if (p.row === t[i].row && p.col === t[i].col) {
+          p.kill("Aargh! You were eaten by a " + t[i].latin_name + ".");
+          p.reset();
+        }
+      }
     }
   };
   player.reset();
@@ -438,9 +458,9 @@ $(function() {
     ctx.fillText("Score:  " + game.score, 5, game.height - 22);
     ctx.fillText("Level: " + game.level, 5, 21);
     ctx.textAlign = "center";
-    ctx.fillText($word_data.find("topic").text(), game.width / 2, 26);
-    ctx.fillRect(game.width / 2 - topic_width, 5, topic_width * 2, 2);
-    ctx.fillRect(game.width / 2 - topic_width, 36, topic_width * 2, 2);
+    ctx.fillText($word_data.find("topic").text(), game.width / 2, 31);
+    ctx.fillRect(game.width / 2 - topic_width, 10, topic_width * 2, 2);
+    ctx.fillRect(game.width / 2 - topic_width, 41, topic_width * 2, 2);
     for (var i = 0; i < p.lives; i++) {
       ctx.drawImage(p.sprite, p.lives_sprite * p.width, 0, p.width, p.height, i * (player.width + 15) + start_x, game.height - p.height, p.width, p.height);
     }
