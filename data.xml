@@ -117,5 +117,16 @@
     <a>s</a>
     <a>strike</a>
     <a>u</a>
+    <a>big</a>
+    <a>bold</a>
+    <a>frameset</a>
+    <a>summary</a>
+    <a>xmp</a>
+    <a>plaintext</a>
+    <a>listing</a>
+    <a>noframes</a>
+    <a>nextid</a>
+    <a>nobr</a>
+    <a>noembed</a>
   </incorrect>
 </game>

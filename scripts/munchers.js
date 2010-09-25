@@ -10,8 +10,9 @@ $(function() {
     score: 0,
     points: 5,
     correct: 0,
-    font: "bold 16px 'American Typewriter'"
+    font: "bold 16px 'American Typewriter'",
   };
+  game.title_screen = newImage("title.jpg");
   var grid = {
     w: 117,
     h: 72,
@@ -325,9 +326,25 @@ $(function() {
   $.get("data.xml", function(r) {
     $word_data = $(r);
     createWordMatrix();
-    keyBindings();
-    game.running = run();
+    titleScreen();
   });
+
+  function titleScreen() {
+    ctx.save();
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, game.width, game.height);
+    ctx.drawImage(game.title_screen, 0, 54);
+    ctx.fillStyle = "black";
+    ctx.textAlign = "center";
+    ctx.font = game.font;
+    ctx.fillText("Press any key to continue", game.width / 2, game.height - 30);
+    $(document).bind("keydown.start_game", function(e) {
+      $(this).unbind(e);
+      keyBindings();
+      game.running = run();
+    });
+    ctx.restore();
+  }
 
   function main() {
     if (!player.lives) { gameOver(); }
@@ -375,7 +392,9 @@ $(function() {
 
   function newImage(src) {
     var img = new Image();
+    if (!("image_assets" in document)) { document.image_assets = []; }
     img.src = game.image_path + src;
+    document.image_assets.push(img);
     return img;
   }
 
