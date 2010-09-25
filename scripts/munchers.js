@@ -1,4 +1,9 @@
 $(function() {
+  var sm = soundManager;
+  sm.url = 'swf/';
+  sm.flashVersion = 9;
+  sm.useFlashBlock = false;
+  sm.useHTML5Audio = true;
   var ctx = $("canvas")[0].getContext("2d");
   var game = {
     paused: false,
@@ -12,6 +17,31 @@ $(function() {
     correct: 0,
     font: "bold 16px 'American Typewriter'",
   };
+  var sounds = [{
+    id: "eaten",
+    url: "audio/eaten.mp3"
+  }, {
+    id: "level_complete",
+    url: "audio/level_complete.mp3"
+  }, {
+    id: "munch",
+    url: "audio/munch.mp3"
+  }, {
+    id: "safe",
+    url: "audio/safe.mp3"
+  }, {
+    id: "start",
+    url: "audio/start.mp3"
+  }, {
+    id: "troggle_alert",
+    url: "audio/troggle_alert.mp3"
+  }, {
+    id: "victory",
+    url: "audio/victory.mp3"
+  }, {
+    id: "wrong",
+    url: "audio/wrong.mp3"
+  }];
   game.title_screen = newImage("title.jpg");
   var grid = {
     w: 117,
@@ -62,6 +92,7 @@ $(function() {
     enemies: [],
     wait: 50,
     next_enemy: random(300, 100),
+    warning_sound: false,
     newEnemy: function() {
       var e = this,
           g = grid;
@@ -114,6 +145,11 @@ $(function() {
                      (troggle.current_dir === "u" && troggle.row >= grid.rows) ||
                      (troggle.current_dir === "r" && troggle.col < 0) ||
                      (troggle.current_dir === "d" && troggle.row < 0));
+        if (t.entering && !t.warning_sound) {
+          t.warning_sound = true;
+          sm.play("troggle_alert");
+        }
+        else if (!t.entering) { t.warning_sound = false; }
         if (troggle.present) {
           (!troggle.wait_count && !troggle.moving) ? troggle.moving = true : troggle.wait_count--;
           if (troggle.moving) {
@@ -167,6 +203,7 @@ $(function() {
       if (e.current_dir === "l" || e.current_dir === "r") { collided = (e.next_col === p.col && e.row === p.row); }
       else if (e.current_dir === "u" || e.current_dir === "d") { collided = (e.next_row === p.row && e.col === p.col); }
       if (collided) {
+        sm.play("eaten");
         e.munching = true;
         e.sprite_delay = 3;
       }
@@ -269,14 +306,16 @@ $(function() {
       p.current_sprite = (p.current_sprite % 2) ? 0 : 5;
       ctx.drawImage(p.sprite, p.current_sprite * p.width, y, p.width, p.height, p.x, p.y, p.width, p.height);
       if (answers[p.col][p.row] && words[p.col][p.row]) {
+        sm.play("munch");
         game.score += game.points * game.level;
-        words[p.col][p.row] = "";
         game.correct--;
         p.lives_sprite = 4;
       }
       else if (!answers[p.col][p.row] && p.sprite_delay === 7) {
+        sm.play("wrong");
         p.kill("Oops! That's not a correct answer!");
       }
+      words[p.col][p.row] = "";
     },
     kill: function(str) {
       var p = this;
@@ -312,6 +351,7 @@ $(function() {
         if (p.row === t[i].row && p.col === t[i].col) {
           t[i].munching = true;
           t[i].sprite_delay = 8;
+          sm.play("eaten");
           troggles.munch(t[i]);
         }
       }
@@ -326,10 +366,14 @@ $(function() {
   $.get("data.xml", function(r) {
     $word_data = $(r);
     createWordMatrix();
-    titleScreen();
+    sm.onready(titleScreen);
   });
 
   function titleScreen() {
+    for (var i in sounds) {
+      sm.createSound(sounds[i]);
+    }
+    sm.play("victory");
     ctx.save();
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, game.width, game.height);
@@ -342,6 +386,8 @@ $(function() {
       $(this).unbind(e);
       keyBindings();
       game.running = run();
+      sm.play("start");
+      return false;
     });
     ctx.restore();
   }
@@ -349,6 +395,7 @@ $(function() {
   function main() {
     if (!player.lives) { gameOver(); }
     if (!game.correct) {
+      sm.play("level_complete");
       dialog("Level complete!", function() {
         player.reset();
         game.level++;
@@ -533,6 +580,7 @@ $(function() {
         moving: false,
         move_count: 0
       };
+      sm.play("game_over");
       $(document).unbind("keyup.normal keydown.normal");
       ctx.save();
       ctx.globalAlpha = .7;
