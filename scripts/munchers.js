@@ -552,19 +552,6 @@ $(function() {
     if (troggles.entering) { troggles.warning(); }
   }
 
-  function levelComplete() {
-    ctx.save();
-    ctx.globalAlpha = .7;
-    ctx.fillStyle = game.bg;
-    ctx.fillRect(0, 0, game.width, game.height);
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = "white";
-    ctx.font = "bold 28px monospace";
-    ctx.textAlign = "center";
-    ctx.fillText("Complete!", game.width / 2, game.height / 2 - 14);
-    ctx.restore();
-  }
-
   function gameOver() {
     clearInterval(game.running);
     setTimeout(function() {
